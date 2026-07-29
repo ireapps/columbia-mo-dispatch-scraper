@@ -1,0 +1,44 @@
+name: Scrape new Columbia dispatch calls
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    env:
+      SLACK_HOOK_PYTHON26: ${{ secrets.SLACK_HOOK_PYTHON26 }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies with uv
+        run: |
+          uv sync --system
+
+      - name: Install Playwright browsers
+        run: uv run playwright install --with-deps
+
+      - name: Run Playwright in headful mode
+        run: |
+          xvfb-run --auto-servernum -- uv run main.py
+        
+      - name: Add and commit
+        id: add_commit
+        uses: EndBug/add-and-commit@main
+        with:
+          committer_name: Automated
+          committer_email: actions@users.noreply.github.com
+          message: "add latest data"
