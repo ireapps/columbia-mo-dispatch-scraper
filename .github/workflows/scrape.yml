@@ -1,8 +1,6 @@
 name: Scrape new Columbia dispatch calls
 
 on:
-  schedule:
-    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 jobs:
